@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Sign in{% endblock %}
+{% block body %}
+<div class="auth">
+  <aside class="auth-art" aria-hidden="true">
+    <a class="brand" href="{{ url_for('pages.landing') }}"><span class="brand-mark">{{ icon('headset', 22) }}</span><span>SupportSphere <b>AI</b></span></a>
+    <div>
+      <h2>Welcome back.</h2>
+      <p>Pick up your conversations and tickets right where you left them.</p>
+      <ul>
+        <li>{{ icon('sparkles', 20) }} AI answers from Groq &amp; Gemini</li>
+        <li>{{ icon('ticket', 20) }} Track replies from the support team</li>
+        <li>{{ icon('shield', 20) }} Secure, private and accessible</li>
+      </ul>
+    </div>
+    <span class="tiny" style="opacity:.8">SupportSphere AI</span>
+  </aside>
+  <main id="main" class="auth-form" tabindex="-1">
+    <div class="auth-card">
+      <h1>Sign in</h1>
+      <p class="muted">Enter your details to continue.</p>
+      {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, text in msgs %}
+        <div class="alert alert-{{ 'success' if cat == 'success' else 'error' }}" role="status">{{ text }}</div>
+      {% endfor %}{% endwith %}
+      {% if error %}<div class="alert alert-error" role="alert">{{ icon('alert', 18) }}<span>{{ error }}</span></div>{% endif %}
+      <form method="post" novalidate>
+        {{ m.csrf() }}
+        <input type="hidden" name="next" value="{{ next }}">
+        <div class="field">
+          <label for="email">Email</label>
+          <div class="input-icon">{{ icon('mail', 18) }}<input id="email" name="email" type="email" autocomplete="email" value="{{ email }}" required autofocus></div>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pw-wrap input-icon">{{ icon('lock', 18) }}<input id="password" name="password" type="password" autocomplete="current-password" required><button type="button" class="pw-toggle" data-toggle-pw="password" aria-label="Show password">Show</button></div>
+        </div>
+        <div class="field"><label class="check"><input type="checkbox" name="remember" value="1"> Keep me signed in for 14 days</label></div>
+        <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+      <p class="small" style="margin-top:1.2rem">New here? <a href="{{ url_for('auth.register') }}">Create an account</a> · <a href="{{ url_for('pages.landing') }}">Back to home</a></p>
+    </div>
+  </main>
+</div>
+{% endblock %}

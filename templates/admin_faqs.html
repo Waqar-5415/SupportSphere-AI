@@ -1,0 +1,33 @@
+{% extends "app_base.html" %}
+{% block title %}Help articles{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Help articles</h1><p class="muted">The knowledge base used by the Help Centre <em>and</em> by the AI assistant. {{ faqs|length }} articles.</p></div>
+  <button class="btn btn-primary" id="faqNew" type="button">{{ icon('plus', 18) }} New article</button></div>
+
+{% if faqs %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Question</th><th>Category</th><th style="width:1%">Actions</th></tr></thead>
+  <tbody>{% for f in faqs %}
+    <tr data-faq='{{ {"id": f.id, "category": f.category, "question": f.question, "answer": f.answer, "keywords": f.keywords}|tojson|forceescape }}'>
+      <td><strong>{{ f.question }}</strong><div class="muted tiny truncate" style="max-width:560px">{{ f.answer|replace('**', '')|replace('\n', ' ')|truncate(110) }}</div></td>
+      <td><span class="badge badge-neutral plain">{{ f.category }}</span></td>
+      <td><div class="btn-row" style="flex-wrap:nowrap"><button class="btn btn-ghost btn-sm faq-edit" type="button">{{ icon('edit', 15) }} Edit</button><button class="btn btn-danger-ghost btn-sm faq-del" type="button" aria-label="Delete {{ f.question }}">{{ icon('trash', 15) }}</button></div></td></tr>{% endfor %}
+  </tbody></table></div>
+{% else %}<div class="card">{% call m.empty('book', 'No articles', 'Add your first help article.') %}{% endcall %}</div>{% endif %}
+
+<div class="modal" id="faqModal" role="dialog" aria-modal="true" aria-labelledby="faqModalTitle" hidden>
+  <div class="modal-card">
+    <h2 id="faqModalTitle">New article</h2>
+    <form id="faqForm" novalidate>
+      <input type="hidden" name="faq_id" value="">
+      <div class="field"><label for="fq">Question</label><input id="fq" name="question" type="text" maxlength="200">{{ m.field_error('question') }}</div>
+      <div class="field"><label for="fcat">Category</label><select id="fcat" name="category">{% for c in categories %}<option>{{ c }}</option>{% endfor %}</select>{{ m.field_error('category') }}</div>
+      <div class="field"><label for="fa">Answer</label><textarea id="fa" name="answer" rows="7" maxlength="3000"></textarea><p class="hint">Use “- ” for bullet points and **double asterisks** for bold.</p>{{ m.field_error('answer') }}</div>
+      <div class="field"><label for="fk">Search keywords <span class="opt">(optional)</span></label><input id="fk" name="keywords" type="text" maxlength="300"><p class="hint">Extra words customers might use, separated by spaces.</p>{{ m.field_error('keywords') }}</div>
+      <p class="field-error" data-error-for="form" role="alert" hidden></p>
+      <div class="btn-row"><button class="btn btn-primary" type="submit">Save article</button><button class="btn btn-ghost" type="button" id="faqCancel">Cancel</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/admin.js') }}"></script>{% endblock %}

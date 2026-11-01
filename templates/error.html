@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block body %}
+<main id="main" class="error-page" tabindex="-1">
+  <div>
+    <div class="error-code grad-text">{{ code }}</div>
+    <h1>{{ title }}</h1>
+    <p class="muted">{{ message }}</p>
+    <div class="btn-row" style="justify-content:center;margin-top:1rem">
+      {% if current_user %}
+        <a class="btn btn-primary" href="{{ url_for('pages.admin_overview' if current_user['role'] == 'admin' else 'pages.dashboard') }}">Back to dashboard</a>
+      {% else %}
+        <a class="btn btn-primary" href="{{ url_for('pages.landing') }}">Back to home</a>
+        <a class="btn btn-secondary" href="{{ url_for('auth.login') }}">Sign in</a>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

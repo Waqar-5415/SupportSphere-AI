@@ -1,0 +1,60 @@
+{% extends "app_base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Settings</h1><p class="muted">Manage your profile, appearance and security.</p></div></div>
+
+<div class="stack" style="max-width:760px">
+  <section class="card" aria-labelledby="p-h">
+    <h2 id="p-h">Profile</h2>
+    <form id="profileForm" novalidate>
+      <div class="grid grid-2">
+        <div class="field"><label for="name">Full name</label><input id="name" name="name" type="text" maxlength="60" value="{{ current_user['name'] }}" required>{{ m.field_error('name') }}</div>
+        <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" maxlength="120" value="{{ current_user['email'] }}" required>{{ m.field_error('email') }}</div>
+      </div>
+      <p class="field-error" data-error-for="form" role="alert" hidden></p>
+      <button class="btn btn-primary" type="submit">Save profile</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="a-h">
+    <h2 id="a-h">Appearance &amp; AI</h2>
+    <form id="prefForm" novalidate>
+      <fieldset class="field"><legend>Theme</legend>
+        <div class="radio-cards">{% for t, d in [('light', 'Bright and clean'), ('dark', 'Easy on the eyes'), ('system', 'Match my device')] %}
+          <label class="radio-card"><input type="radio" name="theme" value="{{ t }}" {% if current_user['theme'] == t %}checked{% endif %}><span>{{ t|capitalize }}<small>{{ d }}</small></span></label>{% endfor %}</div></fieldset>
+      <fieldset class="field"><legend>Text size</legend>
+        <div class="radio-cards">{% for s, d in [('normal', 'Standard'), ('large', 'Easier to read')] %}
+          <label class="radio-card"><input type="radio" name="text_size" value="{{ s }}" {% if current_user['text_size'] == s %}checked{% endif %}><span>{{ s|capitalize }}<small>{{ d }}</small></span></label>{% endfor %}</div></fieldset>
+      <fieldset class="field"><legend>Preferred AI engine</legend>
+        <div class="radio-cards">
+          <label class="radio-card"><input type="radio" name="ai_provider" value="auto" {% if current_user['ai_provider'] == 'auto' %}checked{% endif %}><span>Auto<small>Best available</small></span></label>
+          {% for p in providers %}<label class="radio-card"><input type="radio" name="ai_provider" value="{{ p.id }}" {% if not p.configured %}disabled{% endif %} {% if current_user['ai_provider'] == p.id %}checked{% endif %}><span>{{ p.label }}<small>{{ 'Connected' if p.configured else 'Not connected' }}</small></span></label>{% endfor %}
+        </div>
+        <p class="hint">If your chosen engine is busy, the other one answers automatically.</p></fieldset>
+      <p class="field-error" data-error-for="form" role="alert" hidden></p>
+      <button class="btn btn-primary" type="submit">Save preferences</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="pw-h">
+    <h2 id="pw-h">Change password</h2>
+    <form id="pwForm" novalidate>
+      <div class="field"><label for="current">Current password</label><input id="current" name="current" type="password" autocomplete="current-password">{{ m.field_error('current') }}</div>
+      <div class="field"><label for="new">New password</label><input id="new" name="new" type="password" autocomplete="new-password" maxlength="128"><p class="hint">At least 8 characters with a letter and a number.</p>{{ m.field_error('new') }}</div>
+      <p class="field-error" data-error-for="form" role="alert" hidden></p>
+      <button class="btn btn-primary" type="submit">Update password</button>
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="dz-h" style="border-color:var(--danger)">
+    <h2 id="dz-h" style="color:var(--danger)">Danger zone</h2>
+    <p class="muted">Deleting your account permanently removes your tickets, conversations and feedback. This cannot be undone.</p>
+    <form id="deleteForm" novalidate>
+      <div class="field"><label for="delpw">Confirm with your password</label><input id="delpw" name="password" type="password" autocomplete="current-password">{{ m.field_error('password') }}</div>
+      <p class="field-error" data-error-for="form" role="alert" hidden></p>
+      <button class="btn btn-danger-ghost" type="submit">{{ icon('trash', 18) }} Delete my account</button>
+    </form>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/settings.js') }}"></script>{% endblock %}

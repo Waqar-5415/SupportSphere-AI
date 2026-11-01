@@ -1,0 +1,30 @@
+{% extends "app_base.html" %}
+{% block title %}Tickets{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Support tickets</h1><p class="muted">{{ total }} ticket{{ '' if total == 1 else 's' }} match your filters.</p></div></div>
+
+<form method="get" class="card filters" style="margin-bottom:1.1rem" role="search" aria-label="Filter tickets">
+  <div><label for="q">Search</label><input id="q" name="q" type="search" value="{{ filters.q }}" placeholder="Subject, customer, SS-0001…"></div>
+  <div><label for="fs">Status</label><select id="fs" name="status"><option value="">All</option>{% for s in statuses %}<option {{ 'selected' if filters.status == s }}>{{ s }}</option>{% endfor %}</select></div>
+  <div><label for="fp">Priority</label><select id="fp" name="priority"><option value="">All</option>{% for p in priorities %}<option {{ 'selected' if filters.priority == p }}>{{ p }}</option>{% endfor %}</select></div>
+  <div><label for="fc">Category</label><select id="fc" name="category"><option value="">All</option>{% for c in categories %}<option {{ 'selected' if filters.category == c }}>{{ c }}</option>{% endfor %}</select></div>
+  <div class="btn-row"><button class="btn btn-primary" type="submit">{{ icon('filter', 16) }} Filter</button>{% if query %}<a class="btn btn-ghost" href="{{ url_for('pages.admin_tickets') }}">Reset</a>{% endif %}</div>
+</form>
+
+{% if tickets %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Ticket</th><th>Customer</th><th>Category</th><th>Priority</th><th>Status</th><th>Replies</th><th>Updated</th></tr></thead>
+  <tbody>{% for t in tickets %}
+    <tr><td><a class="row-link" href="{{ url_for('pages.admin_ticket_detail', tid=t.id) }}">{{ t.id|ref }} · {{ t.subject|truncate(46) }}</a></td>
+      <td>{{ t.user_name }}<div class="muted tiny">{{ t.user_email }}</div></td><td>{{ t.category }}</td><td>{{ m.priority(t.priority) }}</td><td>{{ m.status(t.status) }}</td>
+      <td>{{ t.reply_count }}</td><td class="muted">{{ t.updated_at|localtime('short') }}</td></tr>{% endfor %}
+  </tbody></table></div>
+<div class="pager">
+  <span class="muted small">Page {{ page }} of {{ pages }}</span>
+  <div class="btn-row">
+    {% if page > 1 %}<a class="btn btn-ghost btn-sm" href="{{ url_for('pages.admin_tickets', page=page - 1, **query) }}">← Previous</a>{% endif %}
+    {% if page < pages %}<a class="btn btn-ghost btn-sm" href="{{ url_for('pages.admin_tickets', page=page + 1, **query) }}">Next →</a>{% endif %}
+  </div>
+</div>
+{% else %}<div class="card">{% call m.empty('inbox', 'No tickets found', 'Try changing or resetting the filters.') %}{% endcall %}</div>{% endif %}
+{% endblock %}

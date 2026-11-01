@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Create account{% endblock %}
+{% block body %}
+<div class="auth">
+  <aside class="auth-art" aria-hidden="true">
+    <a class="brand" href="{{ url_for('pages.landing') }}"><span class="brand-mark">{{ icon('headset', 22) }}</span><span>SupportSphere <b>AI</b></span></a>
+    <div>
+      <h2>Support that works around you.</h2>
+      <p>Create a free account to chat with the AI assistant, search help articles and open tickets.</p>
+      <ul>
+        <li>{{ icon('check', 20) }} Free, no credit card</li>
+        <li>{{ icon('clock', 20) }} Answers in seconds, 24/7</li>
+        <li>{{ icon('lock', 20) }} Passwords are stored as salted hashes</li>
+      </ul>
+    </div>
+    <span class="tiny" style="opacity:.8">SupportSphere AI</span>
+  </aside>
+  <main id="main" class="auth-form" tabindex="-1">
+    <div class="auth-card">
+      <h1>Create your account</h1>
+      <p class="muted">It only takes a minute.</p>
+      <form method="post" novalidate>
+        {{ m.csrf() }}
+        <div class="field">
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" autocomplete="name" value="{{ form.name }}" maxlength="60" required autofocus {% if errors.name %}aria-invalid="true" aria-describedby="name-err"{% endif %}>
+          {% if errors.name %}<p class="field-error" id="name-err">{{ icon('alert', 16) }}{{ errors.name }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" value="{{ form.email }}" maxlength="120" required {% if errors.email %}aria-invalid="true" aria-describedby="email-err"{% endif %}>
+          {% if errors.email %}<p class="field-error" id="email-err">{{ icon('alert', 16) }}{{ errors.email }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="pw-wrap"><input id="password" name="password" type="password" autocomplete="new-password" maxlength="128" required aria-describedby="pw-hint{% if errors.password %} pw-err{% endif %}" {% if errors.password %}aria-invalid="true"{% endif %}><button type="button" class="pw-toggle" data-toggle-pw="password" aria-label="Show password">Show</button></div>
+          <p class="hint" id="pw-hint">At least 8 characters with a letter and a number.</p>
+          {% if errors.password %}<p class="field-error" id="pw-err">{{ icon('alert', 16) }}{{ errors.password }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="confirm">Confirm password</label>
+          <input id="confirm" name="confirm" type="password" autocomplete="new-password" maxlength="128" required {% if errors.confirm %}aria-invalid="true" aria-describedby="confirm-err"{% endif %}>
+          {% if errors.confirm %}<p class="field-error" id="confirm-err">{{ icon('alert', 16) }}{{ errors.confirm }}</p>{% endif %}
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Create account</button>
+      </form>
+      <p class="small" style="margin-top:1.2rem">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a> · <a href="{{ url_for('pages.landing') }}">Back to home</a></p>
+    </div>
+  </main>
+</div>
+{% endblock %}

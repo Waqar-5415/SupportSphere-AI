@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}AI-powered customer support{% endblock %}
+{% block body %}
+<header class="pub-header">
+  <div class="container">
+    <a class="brand" href="{{ url_for('pages.landing') }}"><span class="brand-mark">{{ icon('headset', 22) }}</span><span>SupportSphere <b>AI</b></span></a>
+    <nav class="pub-nav" aria-label="Main navigation">
+      <a class="link" href="#features">Features</a>
+      <a class="link" href="#how">How it works</a>
+      {% if current_user %}
+        <a class="btn btn-primary btn-sm" href="{{ url_for('pages.admin_overview' if current_user['role'] == 'admin' else 'pages.dashboard') }}">Open dashboard</a>
+      {% else %}
+        <a class="link" href="{{ url_for('auth.login') }}">Sign in</a>
+        <a class="btn btn-primary btn-sm" href="{{ url_for('auth.register') }}">Get started</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <div class="container">
+    {% with msgs = get_flashed_messages(with_categories=true) %}{% if msgs %}
+      <div class="flash-stack" style="margin-top:1rem">{% for cat, text in msgs %}<div class="alert alert-{{ 'success' if cat == 'success' else 'error' }}" role="status">{{ text }}</div>{% endfor %}</div>
+    {% endif %}{% endwith %}
+
+    <section class="hero" aria-labelledby="hero-h">
+      <div>
+        <span class="eyebrow">{{ icon('sparkles', 16) }} Powered by Groq &amp; Google Gemini</span>
+        <h1 id="hero-h">Support that answers <span class="grad-text">before you have to wait.</span></h1>
+        <p class="lead">Get instant, accurate answers from an AI assistant, search a living help centre, and open tickets that a real support team replies to — all in one calm, simple place.</p>
+        <div class="btn-row" style="margin-top:1.4rem">
+          {% if current_user %}
+            <a class="btn btn-primary" href="{{ url_for('pages.chat') }}">{{ icon('chat', 18) }} Open AI chat</a>
+          {% else %}
+            <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Create free account {{ icon('arrow', 18) }}</a>
+            <a class="btn btn-secondary" href="{{ url_for('auth.login') }}">Sign in</a>
+          {% endif %}
+        </div>
+        <p class="hint" style="margin-top:1rem">Available 24/7 · No credit card · Your data stays private</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="mock">
+          <div class="mock-bar"><i></i><i></i><i></i></div>
+          <div class="msg user"><span class="msg-av" style="--h:200">AK</span><div class="msg-body"><div class="bubble">I was charged twice this month. What should I do?</div></div></div>
+          <div class="msg bot"><span class="msg-av">{{ icon('sparkles', 16) }}</span><div class="msg-body"><div class="bubble"><p><strong>A duplicate charge is often a temporary hold.</strong></p><ul><li>It usually disappears within a few days.</li><li>If both remain after 5 working days, open a Billing ticket.</li></ul></div><div class="msg-meta"><span class="tag t-groq">Groq</span><span class="tag t-faq">From help centre</span></div></div></div>
+        </div>
+        <div class="float-card"><span class="stat-icon t-ok">{{ icon('check', 22) }}</span><div><strong>Ticket resolved</strong><div class="muted tiny">Reply from the support team</div></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="features" aria-labelledby="feat-h">
+      <div class="section-title"><h2 id="feat-h" style="font-size:1.9rem">Everything you need to get help fast</h2><p class="muted">Three ways to solve a problem, one account to keep track of it all.</p></div>
+      <div class="grid grid-3">
+        <article class="card feature"><div class="action-icon">{{ icon('sparkles', 24) }}</div><h3>Instant AI answers</h3><p>Ask in plain language. The assistant uses our help articles and your ticket history to answer, and falls back gracefully if one AI engine is busy.</p></article>
+        <article class="card feature"><div class="action-icon">{{ icon('book', 24) }}</div><h3>Searchable Help Centre</h3><p>Browse articles by category or search by keyword. Every answer is written in short, clear steps.</p></article>
+        <article class="card feature"><div class="action-icon">{{ icon('ticket', 24) }}</div><h3>Tickets with real replies</h3><p>Describe a problem once and follow the conversation with our team, with status updates and notifications.</p></article>
+        <article class="card feature"><div class="action-icon">{{ icon('shield', 24) }}</div><h3>Private &amp; secure</h3><p>Salted password hashing, protected sessions, and a rule that we never ask for your password in chat.</p></article>
+        <article class="card feature"><div class="action-icon">{{ icon('sun', 24) }}</div><h3>Made for everyone</h3><p>Light, dark and large-text modes, keyboard navigation and screen-reader friendly design on any device.</p></article>
+        <article class="card feature"><div class="action-icon">{{ icon('chart', 24) }}</div><h3>Admin console</h3><p>Support staff get a dashboard with ticket queues, analytics, user management and an editable knowledge base.</p></article>
+      </div>
+    </section>
+
+    <section class="section" id="how" aria-labelledby="how-h">
+      <div class="section-title"><h2 id="how-h" style="font-size:1.9rem">How it works</h2></div>
+      <div class="grid grid-3 steps">
+        <div class="step"><h3>Ask the assistant</h3><p class="muted">Type your question. Most common problems are solved in seconds.</p></div>
+        <div class="step"><h3>Check the Help Centre</h3><p class="muted">Search step-by-step guides for account, billing, security and technical topics.</p></div>
+        <div class="step"><h3>Open a ticket if needed</h3><p class="muted">Not solved? Our team replies directly and you can track every update.</p></div>
+      </div>
+    </section>
+
+    {% if faqs %}
+    <section class="section" aria-labelledby="topics-h">
+      <div class="section-title"><h2 id="topics-h" style="font-size:1.9rem">Popular topics</h2></div>
+      <div class="grid grid-3">
+        {% for f in faqs[:3] %}
+        <article class="card"><span class="badge badge-neutral plain">{{ f.category }}</span><h3 style="margin-top:.6rem">{{ f.question }}</h3><p class="muted small">{{ f.answer|replace('**', '')|replace('\n', ' ')|truncate(130) }}</p></article>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <section class="section">
+      <div class="cta-band">
+        <h2>Ready to get answers?</h2>
+        <p>Create your free account in under a minute.</p>
+        <div class="btn-row" style="justify-content:center;margin-top:1rem">
+          {% if current_user %}<a class="btn btn-white" href="{{ url_for('pages.dashboard') }}">Go to dashboard</a>
+          {% else %}<a class="btn btn-white" href="{{ url_for('auth.register') }}">Create account</a><a class="btn btn-outline-white" href="{{ url_for('auth.login') }}">Sign in</a>{% endif %}
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="pub-footer"><div class="container"><span>© SupportSphere AI</span><span>AI answers may contain mistakes — check important details.</span></div></footer>
+{% endblock %}

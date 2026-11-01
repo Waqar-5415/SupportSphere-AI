@@ -1,0 +1,47 @@
+{% extends "app_base.html" %}
+{% block title %}{{ ticket.id|ref }}{% endblock %}
+{% block content %}
+<p class="small"><a href="{{ url_for('pages.tickets') }}">← Back to My Tickets</a></p>
+<div class="page-head">
+  <div style="min-width:0"><h1 style="overflow-wrap:anywhere">{{ ticket.subject }}</h1>
+    <p class="muted">{{ ticket.id|ref }} · opened {{ ticket.created_at|localtime }}</p></div>
+  <div class="btn-row">{{ m.status(ticket.status) }}
+    {% if ticket.status != 'Closed' %}<button class="btn btn-ghost btn-sm" id="closeTicket" type="button" data-id="{{ ticket.id }}">Close ticket</button>{% endif %}</div>
+</div>
+
+<div class="grid grid-side">
+  <section aria-labelledby="conv-h">
+    <h2 id="conv-h" class="visually-hidden">Conversation</h2>
+    <div class="thread" id="thread">
+      <div class="post"><span>{{ m.avatar(current_user['name']) }}</span>
+        <div class="post-body"><div class="post-head"><strong>You</strong><span class="muted tiny">{{ ticket.created_at|localtime }}</span></div><p class="post-text">{{ ticket.description }}</p></div></div>
+      {% for r in replies %}
+      <div class="post {{ 'staff' if r.author_role == 'admin' else '' }}">
+        <span>{{ m.avatar(r.author_name or 'Support') }}</span>
+        <div class="post-body"><div class="post-head"><strong>{{ 'You' if r.author_role == 'user' else (r.author_name or 'Support team') }}</strong>{% if r.author_role == 'admin' %}<span class="badge role-admin plain">Support team</span>{% endif %}<span class="muted tiny">{{ r.created_at|localtime }}</span></div><p class="post-text">{{ r.body }}</p></div>
+      </div>
+      {% endfor %}
+      {% if not replies %}<p class="timeline-note">{{ icon('clock', 14) }} Our team will reply here. Typical first response: High 4h · Medium 1 day · Low 3 days.</p>{% endif %}
+    </div>
+
+    <form id="replyForm" class="card" style="margin-top:1.1rem" data-id="{{ ticket.id }}" novalidate>
+      <label for="replyBody">{{ 'Reply (this will re-open the ticket)' if ticket.status in ('Resolved', 'Closed') else 'Add a reply' }}</label>
+      <textarea id="replyBody" name="body" rows="4" maxlength="2000" placeholder="Write your message…"></textarea>
+      <p class="field-error" data-error-for="form" role="alert" hidden></p>
+      <div class="btn-row" style="margin-top:.8rem"><button class="btn btn-primary" type="submit">{{ icon('send', 18) }} Send reply</button></div>
+    </form>
+  </section>
+
+  <aside class="card" aria-labelledby="det-h">
+    <h2 id="det-h">Details</h2>
+    <dl class="kv">
+      <dt>Status</dt><dd>{{ m.status(ticket.status) }}</dd>
+      <dt>Priority</dt><dd>{{ m.priority(ticket.priority) }}</dd>
+      <dt>Category</dt><dd>{{ ticket.category }}</dd>
+      <dt>Created</dt><dd>{{ ticket.created_at|localtime }}</dd>
+      <dt>Updated</dt><dd>{{ ticket.updated_at|localtime }}</dd>
+    </dl>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/tickets.js') }}"></script>{% endblock %}

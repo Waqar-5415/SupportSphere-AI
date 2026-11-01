@@ -1,0 +1,13 @@
+{% macro status(s) %}<span class="badge st-{{ s|lower|replace(' ', '-') }}">{{ s }}</span>{% endmacro %}
+{% macro priority(p) %}<span class="badge plain pr-{{ p|lower }}">{{ p }} priority</span>{% endmacro %}
+{% macro avatar(name, cls='') %}<span class="avatar {{ cls }}" style="--h: {{ name|hue }}" aria-hidden="true">{{ name|initials }}</span>{% endmacro %}
+{% macro empty(ico, title, text='') %}
+<div class="empty">
+  <div class="empty-icon">{{ icon(ico, 28) }}</div>
+  <h3>{{ title }}</h3>
+  {% if text %}<p>{{ text }}</p>{% endif %}
+  {{ caller() if caller }}
+</div>
+{% endmacro %}
+{% macro field_error(name) %}<p class="field-error" data-error-for="{{ name }}" hidden></p>{% endmacro %}
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}

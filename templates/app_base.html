@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% set is_admin = current_user['role'] == 'admin' %}
+{% block body %}
+{% macro navlink(endpoint, label, ico, match) %}
+<a href="{{ url_for(endpoint) }}" {% if request.endpoint in match %}aria-current="page"{% endif %}>
+  {{ icon(ico, 20) }}<span>{{ label }}</span>
+  {% if endpoint == 'pages.tickets' and unread_count %}<span class="dot-badge" title="{{ unread_count }} ticket(s) with new replies"><span class="visually-hidden">{{ unread_count }} new replies</span><span aria-hidden="true">{{ unread_count }}</span></span>{% endif %}
+</a>
+{% endmacro %}
+<div class="shell">
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar">
+    <a class="brand" href="{{ url_for('pages.admin_overview' if is_admin else 'pages.dashboard') }}">
+      <span class="brand-mark">{{ icon('headset', 22) }}</span><span>SupportSphere <b>AI</b></span>
+    </a>
+    <nav class="nav" aria-label="Main navigation">
+      {% if is_admin %}
+        <div class="nav-label">Administration</div>
+        {{ navlink('pages.admin_overview', 'Overview', 'chart', ['pages.admin_overview']) }}
+        {{ navlink('pages.admin_tickets', 'Tickets', 'inbox', ['pages.admin_tickets', 'pages.admin_ticket_detail']) }}
+        {{ navlink('pages.admin_faqs', 'Help articles', 'book', ['pages.admin_faqs']) }}
+        {{ navlink('pages.admin_users', 'Users', 'users', ['pages.admin_users']) }}
+        {{ navlink('pages.admin_feedback', 'Feedback', 'star', ['pages.admin_feedback']) }}
+        {{ navlink('pages.admin_ai', 'AI engines', 'sparkles', ['pages.admin_ai']) }}
+        <div class="nav-label">Account</div>
+        {{ navlink('pages.settings', 'Settings', 'settings', ['pages.settings']) }}
+      {% else %}
+        <div class="nav-label">Support</div>
+        {{ navlink('pages.dashboard', 'Dashboard', 'home', ['pages.dashboard']) }}
+        {{ navlink('pages.chat', 'AI Chat', 'chat', ['pages.chat', 'pages.chat_conv']) }}
+        {{ navlink('pages.help_centre', 'Help Centre', 'book', ['pages.help_centre']) }}
+        {{ navlink('pages.tickets', 'My Tickets', 'ticket', ['pages.tickets', 'pages.ticket_detail']) }}
+        <div class="nav-label">Account</div>
+        {{ navlink('pages.settings', 'Settings', 'settings', ['pages.settings']) }}
+      {% endif %}
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-chip">
+        {{ m.avatar(current_user['name']) }}
+        <div><strong>{{ current_user['name'] }}</strong><span class="muted tiny">{{ 'Administrator' if is_admin else current_user['email'] }}</span></div>
+      </div>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        {{ m.csrf() }}
+        <button class="btn btn-ghost btn-block" type="submit">{{ icon('logout', 18) }} Sign out</button>
+      </form>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="shell-main">
+    <header class="topbar">
+      <button class="icon-btn" id="navOpen" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">{{ icon('menu', 22) }}</button>
+      <a class="brand" href="{{ url_for('pages.admin_overview' if is_admin else 'pages.dashboard') }}"><span class="brand-mark">{{ icon('headset', 18) }}</span><span>SupportSphere <b>AI</b></span></a>
+      <span class="spacer"></span>
+      {{ m.avatar(current_user['name']) }}
+    </header>
+    <main id="main" class="content" tabindex="-1">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% if msgs %}<div class="flash-stack">{% for cat, text in msgs %}
+        <div class="alert alert-{{ 'success' if cat == 'success' else 'error' }}" role="status">{{ icon('check' if cat == 'success' else 'alert', 18) }}<span>{{ text }}</span></div>
+      {% endfor %}</div>{% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}

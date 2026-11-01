@@ -1,0 +1,25 @@
+{% extends "app_base.html" %}
+{% block title %}Help Centre{% endblock %}
+{% block content %}
+<section class="search-hero" aria-labelledby="hc-h">
+  <h1 id="hc-h">Help Centre</h1>
+  <p>Search step-by-step guides, or browse by category.</p>
+  <form id="faqSearchForm" role="search" class="search-box" novalidate>
+    <label for="faqSearch" class="visually-hidden">Search help articles</label>
+    {{ icon('search', 20) }}
+    <input id="faqSearch" type="search" placeholder="Search: password, refund, slow, 2FA…" autocomplete="off" maxlength="200">
+  </form>
+</section>
+
+<div class="chips" role="group" aria-label="Filter by category" id="categoryChips">
+  <button type="button" class="chip" data-category="All" aria-pressed="true">All</button>
+  {% for c in categories %}<button type="button" class="chip" data-category="{{ c }}" aria-pressed="false">{{ c }}</button>{% endfor %}
+</div>
+<p id="faqCount" class="muted small" role="status" aria-live="polite"></p>
+<div id="faqList" class="faq-list"></div>
+<div id="faqEmpty" class="card" hidden>
+  <div class="empty"><div class="empty-icon">{{ icon('search', 28) }}</div><h3>No matching articles</h3><p>Try different keywords or ask for help directly.</p>
+    <div class="btn-row" style="justify-content:center"><a class="btn btn-primary btn-sm" href="{{ url_for('pages.chat') }}">Ask the AI assistant</a><a class="btn btn-secondary btn-sm" href="{{ url_for('pages.tickets') }}?new=1">Open a ticket</a></div></div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/help.js') }}"></script>{% endblock %}

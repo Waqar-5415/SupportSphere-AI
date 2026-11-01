@@ -1,0 +1,68 @@
+{% extends "app_base.html" %}
+{% block title %}My Tickets{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>My Tickets</h1><p class="muted">Open a request and follow the conversation with our support team.</p></div>
+  <button class="btn btn-primary" type="button" id="toggleNew" aria-expanded="false" aria-controls="newTicket">{{ icon('plus', 18) }} New ticket</button>
+</div>
+
+<section class="card" id="newTicket" hidden aria-labelledby="nt-h" style="margin-bottom:1.3rem">
+  <h2 id="nt-h">New ticket</h2>
+  <form id="ticketForm" novalidate>
+    <div class="grid grid-2">
+      <div class="field">
+        <label for="subject">Subject <span aria-hidden="true">*</span></label>
+        <input id="subject" name="subject" type="text" maxlength="120" required aria-describedby="subject-hint">
+        <p id="subject-hint" class="hint">A short summary, e.g. “Cannot download my invoice”.</p>
+        {{ m.field_error('subject') }}
+      </div>
+      <div class="field">
+        <label for="category">Category <span aria-hidden="true">*</span></label>
+        <select id="category" name="category" required><option value="">Choose a category…</option>{% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select>
+        {{ m.field_error('category') }}
+      </div>
+    </div>
+    <fieldset class="field">
+      <legend>Priority <span aria-hidden="true">*</span></legend>
+      <div class="radio-cards">
+        {% for p, d in [('Low', 'Not urgent'), ('Medium', 'Normal issue'), ('High', 'Blocked or security')] %}
+        <label class="radio-card"><input type="radio" name="priority" value="{{ p }}" {% if p == 'Medium' %}checked{% endif %}><span>{{ p }}<small>{{ d }}</small></span></label>
+        {% endfor %}
+      </div>
+      {{ m.field_error('priority') }}
+    </fieldset>
+    <div class="field">
+      <label for="description">Description <span aria-hidden="true">*</span></label>
+      <textarea id="description" name="description" rows="6" maxlength="2000" required aria-describedby="desc-hint"></textarea>
+      <div class="counter"><p id="desc-hint" class="hint">What happened? What did you expect? Please don’t include passwords or card numbers.</p><span id="descCount" class="muted tiny" aria-hidden="true">0 / 2000</span></div>
+      {{ m.field_error('description') }}
+    </div>
+    <p class="field-error" data-error-for="form" role="alert" hidden></p>
+    <div class="btn-row"><button type="submit" class="btn btn-primary" id="ticketSubmit">Submit ticket</button><button type="button" class="btn btn-ghost" id="cancelNew">Cancel</button></div>
+  </form>
+</section>
+
+<nav class="tabs" aria-label="Filter tickets by status">
+  <a class="tab" href="{{ url_for('pages.tickets') }}" {% if not current %}aria-current="true"{% endif %}>All<b>{{ total }}</b></a>
+  {% for s in statuses %}<a class="tab" href="{{ url_for('pages.tickets', status=s) }}" {% if current == s %}aria-current="true"{% endif %}>{{ s }}<b>{{ counts[s] }}</b></a>{% endfor %}
+</nav>
+
+{% if tickets %}
+<div class="stack" style="gap:.7rem">
+  {% for t in tickets %}
+  <a class="ticket-row {% if t.user_unread %}unread{% endif %}" href="{{ url_for('pages.ticket_detail', tid=t.id) }}">
+    <div style="min-width:0">
+      <div class="t-sub truncate"><span class="muted">{{ t.id|ref }}</span> · {{ t.subject }}</div>
+      <div class="t-meta">{{ m.priority(t.priority) }}<span class="badge badge-neutral plain">{{ t.category }}</span>
+        <span class="muted tiny">{{ icon('chat', 13) }} {{ t.reply_count }} {{ 'reply' if t.reply_count == 1 else 'replies' }} · updated {{ t.updated_at|localtime('short') }}</span>
+        {% if t.user_unread %}<span class="badge st-open plain">New reply</span>{% endif %}</div>
+    </div>
+    <div style="align-self:center">{{ m.status(t.status) }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">{% call m.empty('ticket', 'No tickets here', ('No tickets with status ' ~ current ~ '.') if current else 'When you need help from our team, open a ticket and we will reply here.') %}<button type="button" class="btn btn-primary btn-sm" id="emptyNew">Create a ticket</button>{% endcall %}</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/tickets.js') }}"></script>{% endblock %}

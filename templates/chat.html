@@ -1,0 +1,44 @@
+{% extends "app_base.html" %}
+{% block title %}AI Chat{% endblock %}
+{% block content %}
+{% set any_ai = providers|selectattr('configured')|list %}
+<div class="chat-layout" id="chatApp" data-conv-id="{{ conv_id }}" data-name="{{ current_user['name'] }}" data-hue="{{ current_user['name']|hue }}" data-initials="{{ current_user['name']|initials }}">
+  <aside class="card chat-side" id="chatSide" aria-label="Conversations">
+    <a class="btn btn-primary btn-block" href="{{ url_for('pages.chat') }}">{{ icon('plus', 18) }} New chat</a>
+    <div class="conv-list" id="convList" aria-live="polite"><p class="muted small" style="padding:.5rem">Loading…</p></div>
+  </aside>
+
+  <section class="card chat-main" aria-label="Chat with the support assistant">
+    <div class="chat-top">
+      <div style="display:flex;gap:.6rem;align-items:center;min-width:0">
+        <button class="icon-btn only-mobile" id="convToggle" type="button" aria-label="Show conversations" aria-expanded="false">{{ icon('menu', 20) }}</button>
+        <div style="min-width:0"><h1 style="font-size:1.05rem;margin:0" id="chatTitle" class="truncate">New chat</h1>
+          <span class="muted tiny chat-sub">{% if any_ai %}AI answers can contain mistakes — verify important details.{% else %}AI engines not connected — answering from the Help Centre.{% endif %}</span></div>
+      </div>
+      <div class="tools">
+        <label for="engine" class="visually-hidden">AI engine</label>
+        <select id="engine" aria-label="AI engine">
+          <option value="auto" {% if current_user['ai_provider'] == 'auto' %}selected{% endif %}>Engine: Auto</option>
+          {% for p in providers %}<option value="{{ p.id }}" {% if not p.configured %}disabled{% endif %} {% if current_user['ai_provider'] == p.id %}selected{% endif %}>{{ p.label }}{% if not p.configured %} (no key){% endif %}</option>{% endfor %}
+        </select>
+        <button class="btn btn-ghost btn-sm" id="clearChat" type="button" hidden>{{ icon('refresh', 16) }} Clear</button>
+      </div>
+    </div>
+
+    <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-relevant="additions" tabindex="0"></div>
+
+    <div class="chat-composer">
+      <form id="chatForm" novalidate>
+        <div class="composer-row">
+          <label for="chatInput" class="visually-hidden">Type your question</label>
+          <textarea id="chatInput" rows="1" maxlength="1500" placeholder="Type your question…" aria-describedby="chatHint"></textarea>
+          <button type="submit" class="btn btn-primary" id="sendBtn" aria-label="Send message">{{ icon('send', 18) }} <span>Send</span></button>
+        </div>
+        <div class="composer-meta"><span id="chatHint" class="muted tiny">Enter to send · Shift+Enter for a new line</span><span id="chatCount" class="muted tiny" aria-hidden="true">0 / 1500</span></div>
+        <p id="chatError" class="field-error" role="alert" hidden></p>
+      </form>
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/chat.js') }}"></script>{% endblock %}

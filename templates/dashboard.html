@@ -1,0 +1,78 @@
+{% extends "app_base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="welcome" aria-labelledby="wlc">
+  <h1 id="wlc">Hello, {{ current_user['name'].split(' ')[0] }} 👋</h1>
+  <p>How can we help today? Ask the AI assistant, search the Help Centre, or open a ticket for our team.</p>
+  <div class="btn-row">
+    <a class="btn btn-white" href="{{ url_for('pages.chat') }}">{{ icon('chat', 18) }} Ask the AI</a>
+    <a class="btn btn-outline-white" href="{{ url_for('pages.tickets') }}?new=1">{{ icon('plus', 18) }} New ticket</a>
+  </div>
+</section>
+
+<section class="grid grid-4" style="margin-top:1.3rem" aria-label="Your activity">
+  <div class="card stat"><span class="stat-icon">{{ icon('inbox', 22) }}</span><div><div class="stat-num">{{ counts['Open'] }}</div><div class="stat-label">Open tickets</div></div></div>
+  <div class="card stat"><span class="stat-icon t-warn">{{ icon('clock', 22) }}</span><div><div class="stat-num">{{ counts['In Progress'] }}</div><div class="stat-label">In progress</div></div></div>
+  <div class="card stat"><span class="stat-icon t-ok">{{ icon('check', 22) }}</span><div><div class="stat-num">{{ counts['Resolved'] + counts['Closed'] }}</div><div class="stat-label">Resolved</div></div></div>
+  <div class="card stat"><span class="stat-icon t-aqua">{{ icon('chat', 22) }}</span><div><div class="stat-num">{{ chat_total }}</div><div class="stat-label">AI conversations</div></div></div>
+</section>
+
+<section class="grid grid-3" style="margin-top:1.3rem" aria-label="Quick actions">
+  <a class="card action-card" href="{{ url_for('pages.chat') }}"><div class="action-icon">{{ icon('sparkles', 24) }}</div><h3>Ask the AI assistant</h3><p>Get an instant answer in plain language.</p><span class="action-cta">Start chatting {{ icon('arrow', 16) }}</span></a>
+  <a class="card action-card" href="{{ url_for('pages.help_centre') }}"><div class="action-icon">{{ icon('book', 24) }}</div><h3>Browse the Help Centre</h3><p>Step-by-step guides by category.</p><span class="action-cta">Open guides {{ icon('arrow', 16) }}</span></a>
+  <a class="card action-card" href="{{ url_for('pages.tickets') }}?new=1"><div class="action-icon">{{ icon('ticket', 24) }}</div><h3>Contact our team</h3><p>Open a ticket and get a reply from a person.</p><span class="action-cta">Create ticket {{ icon('arrow', 16) }}</span></a>
+</section>
+
+<div class="grid grid-2" style="margin-top:1.3rem">
+  <section class="card" aria-labelledby="rt">
+    <div class="card-head"><h2 id="rt">Recent tickets</h2><a href="{{ url_for('pages.tickets') }}" class="small">View all</a></div>
+    {% if recent %}
+    <ul class="list">
+      {% for t in recent %}
+      <li class="list-item">
+        <div><a class="title truncate" style="display:block" href="{{ url_for('pages.ticket_detail', tid=t.id) }}">{{ t.id|ref }} · {{ t.subject }}</a><div class="muted tiny">{{ t.category }} · updated {{ t.updated_at|localtime('short') }}</div></div>
+        {{ m.status(t.status) }}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}{% call m.empty('ticket', 'No tickets yet', 'Need a hand from our team? Open your first ticket.') %}<a class="btn btn-secondary btn-sm" href="{{ url_for('pages.tickets') }}?new=1">Create a ticket</a>{% endcall %}{% endif %}
+  </section>
+
+  <section class="card" aria-labelledby="rc">
+    <div class="card-head"><h2 id="rc">Recent conversations</h2><a href="{{ url_for('pages.chat') }}" class="small">New chat</a></div>
+    {% if chats %}
+    <ul class="list">
+      {% for c in chats %}
+      <li class="list-item"><div><a class="title truncate" style="display:block" href="{{ url_for('pages.chat_conv', cid=c.id) }}">{{ c.title }}</a><div class="muted tiny">{{ c.updated_at|localtime('short') }}</div></div>{{ icon('chat', 18) }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}{% call m.empty('chat', 'No conversations yet', 'Ask the assistant anything about your account.') %}<a class="btn btn-secondary btn-sm" href="{{ url_for('pages.chat') }}">Start a chat</a>{% endcall %}{% endif %}
+  </section>
+</div>
+
+<div class="grid grid-2" style="margin-top:1.3rem">
+  <section class="card" aria-labelledby="pq">
+    <div class="card-head"><h2 id="pq">Popular questions</h2><a href="{{ url_for('pages.help_centre') }}" class="small">All articles</a></div>
+    <ul class="list">
+      {% for f in popular %}
+      <li class="list-item"><a class="title" href="{{ url_for('pages.help_centre') }}?open={{ f.id }}">{{ f.question }}</a><span class="badge badge-neutral plain">{{ f.category }}</span></li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="exp-h">
+    <h2 id="exp-h">How is your support experience?</h2>
+    <form id="experienceForm" novalidate>
+      <fieldset class="field" style="border:0;padding:0;margin:0 0 .8rem">
+        <legend class="small muted" style="font-weight:500">Rate us from 1 (poor) to 5 (excellent)</legend>
+        <div class="radio-cards five">
+          {% for n in range(1, 6) %}<label class="radio-card"><input type="radio" name="rating" value="{{ n }}"><span>{{ n }} <small>{{ '★' * n }}</small></span></label>{% endfor %}
+        </div>
+      </fieldset>
+      <div class="field"><label for="expComment">Comment <span class="opt">(optional)</span></label><textarea id="expComment" name="comment" rows="2" maxlength="500" style="min-height:70px"></textarea></div>
+      <p class="field-error" data-error-for="form" hidden role="alert"></p>
+      <button class="btn btn-primary" type="submit">Send feedback</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

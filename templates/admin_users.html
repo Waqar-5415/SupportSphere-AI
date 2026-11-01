@@ -1,0 +1,20 @@
+{% extends "app_base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Users</h1><p class="muted">{{ users|length }} account{{ '' if users|length == 1 else 's' }}. Promote customers to staff or deactivate accounts.</p></div></div>
+<div class="table-wrap"><table>
+  <thead><tr><th>User</th><th>Role</th><th>Tickets</th><th>Chats</th><th>Joined</th><th>Last sign-in</th><th>Status</th><th style="width:1%">Actions</th></tr></thead>
+  <tbody>{% for u in users %}
+    <tr>
+      <td><div class="user-chip" style="padding:0">{{ m.avatar(u.name) }}<div><strong>{{ u.name }}{% if u.id == current_user['id'] %} <span class="muted tiny">(you)</span>{% endif %}</strong><span class="muted tiny">{{ u.email }}</span></div></div></td>
+      <td>{% if u.role == 'admin' %}<span class="badge role-admin plain">Administrator</span>{% else %}<span class="badge badge-neutral plain">Customer</span>{% endif %}</td>
+      <td>{{ u.ticket_count }}</td><td>{{ u.chat_count }}</td>
+      <td class="muted">{{ u.created_at|localtime('date') }}</td><td class="muted">{% if u.last_login %}{{ u.last_login|localtime('short') }}{% else %}—{% endif %}</td>
+      <td>{% if u.is_active %}<span class="badge st-resolved">Active</span>{% else %}<span class="badge st-closed">Deactivated</span>{% endif %}</td>
+      <td>{% if u.id != current_user['id'] %}<div class="btn-row" style="flex-wrap:nowrap">
+        <button class="btn btn-ghost btn-sm user-act" type="button" data-id="{{ u.id }}" data-role="{{ 'user' if u.role == 'admin' else 'admin' }}">{{ 'Make customer' if u.role == 'admin' else 'Make admin' }}</button>
+        <button class="btn btn-sm user-act {{ 'btn-danger-ghost' if u.is_active else 'btn-secondary' }}" type="button" data-id="{{ u.id }}" data-active="{{ 0 if u.is_active else 1 }}">{{ 'Deactivate' if u.is_active else 'Reactivate' }}</button></div>{% else %}<span class="muted tiny">—</span>{% endif %}</td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/admin.js') }}"></script>{% endblock %}

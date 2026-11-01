@@ -1,0 +1,15 @@
+{% extends "app_base.html" %}
+{% block title %}Feedback{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Customer feedback</h1><p class="muted">Ratings on AI answers and on the overall experience (latest 200).</p></div></div>
+{% if items %}
+<div class="table-wrap"><table>
+  <thead><tr><th>When</th><th>Customer</th><th>Type</th><th>Rating</th><th>Details</th></tr></thead>
+  <tbody>{% for f in items %}<tr>
+    <td class="muted">{{ f.created_at|localtime('short') }}</td><td>{{ f.user_name or 'Deleted user' }}</td>
+    <td>{{ 'AI answer' if f.kind == 'chat' else 'Experience' }}</td>
+    <td>{% if f.kind == 'chat' %}{% if f.rating == 'helpful' %}<span class="badge st-resolved">Helpful</span>{% else %}<span class="badge pr-high">Not helpful</span>{% endif %}{% else %}<strong>{{ f.rating }}</strong> / 5 <span aria-hidden="true">{{ '★' * (f.rating|int) }}</span>{% endif %}</td>
+    <td style="max-width:420px">{% if f.comment %}<div>“{{ f.comment }}”</div>{% endif %}{% if f.answer %}<div class="muted tiny">Answer: {{ f.answer|replace('**', '')|truncate(120) }}</div>{% endif %}</td>
+  </tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="card">{% call m.empty('star', 'No feedback yet', 'Ratings will show up here as customers use the assistant.') %}{% endcall %}</div>{% endif %}
+{% endblock %}

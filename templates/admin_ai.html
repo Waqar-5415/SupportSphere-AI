@@ -1,0 +1,34 @@
+{% extends "app_base.html" %}
+{% block title %}AI engines{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>AI engines</h1><p class="muted">Connect Groq and Google Gemini, then test each connection.</p></div></div>
+
+<div class="grid grid-side">
+  <section class="card" aria-labelledby="st-h">
+    <h2 id="st-h">Connection status</h2>
+    {% for p in providers %}
+    <div class="prov" data-provider="{{ p.id }}">
+      <div><strong>{{ p.label }}</strong>
+        <div class="muted small">Model: <span class="code">{{ p.model }}</span> · Key: {% if p.configured %}<span class="code">{{ p.id|upper }}_API_KEY</span> found{% else %}<strong>not set</strong>{% endif %}</div>
+        <div class="small ai-result" role="status" aria-live="polite" style="margin-top:.35rem"></div></div>
+      <div class="btn-row"><span class="badge {{ 'st-resolved' if p.configured else 'st-closed' }}">{{ 'Connected' if p.configured else 'No key' }}</span>
+        <button class="btn btn-secondary btn-sm ai-test" type="button" data-provider="{{ p.id }}" {% if not p.configured %}disabled{% endif %}>Test connection</button></div>
+    </div>
+    {% endfor %}
+    <p class="hint" style="margin-top:.5rem">With both keys the assistant tries the customer’s preferred engine first (Auto = Groq first) and switches to the other automatically if it fails. With no keys it answers from help articles.</p>
+  </section>
+
+  <section class="card" aria-labelledby="how-h">
+    <h2 id="how-h">{{ icon('key', 20) }} Where to add the keys</h2>
+    <ol style="padding-left:1.2rem;margin:0">
+      <li>Open the file <span class="code">.env</span> in the project folder (use Notepad or VS Code).</li>
+      <li>Paste your Groq key after <span class="code">GROQ_API_KEY=</span></li>
+      <li>Paste your Gemini key after <span class="code">GEMINI_API_KEY=</span></li>
+      <li>Save the file and <strong>restart the app</strong>, then press “Test connection” here.</li>
+    </ol>
+    <div class="codeblock">GROQ_API_KEY=gsk_your_key_here<br>GEMINI_API_KEY=AIza_your_key_here</div>
+    <p class="small muted">Get free keys: <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a> · <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. No quotes, no spaces. Keys stay on the server and are never shown in the browser.</p>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/admin.js') }}"></script>{% endblock %}
